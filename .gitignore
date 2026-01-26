@@ -1,0 +1,21 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables (Crucial for Engineering Rule 13)
+.env
+.env.local
+.env.production
+
+# Docker logs
+.docker-build/
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db
