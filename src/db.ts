@@ -1,14 +1,17 @@
-import { Pool } from "pg";
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not defined");
-}
+dotenv.config();
 
-export const pool = new Pool({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL?.includes('localhost') 
+    ? false 
+    : { rejectUnauthorized: false } // Required for Supabase
 });
-
-export async function testDbConnection() {
+async function testDbConnection() {
   const result = await pool.query("SELECT 1");
   return result.rows;
 }
+
+export { pool, testDbConnection };
