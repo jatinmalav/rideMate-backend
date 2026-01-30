@@ -7,6 +7,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    environment:
+      - TZ=UTC
     depends_on:
       - postgres
       - redis
@@ -15,6 +17,7 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: ridemate
+      TZ: UTC
       POSTGRES_USER: ridemate
       POSTGRES_PASSWORD: ridemate
     volumes:

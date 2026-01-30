@@ -415,3 +415,35 @@ export async function findRides({
     },
   }));
 }
+
+const FIND_MY_RIDES_SQL = `
+  SELECT
+    r.*,
+    (SELECT COUNT(*) FROM ride_requests req WHERE req.ride_id = r.id AND req.status = 'pending') as pending_requests_count
+  FROM rides r
+  WHERE r.driver_id = $1
+  ORDER BY r.created_at DESC
+`;
+
+/**
+ * Fetches all rides for a given driver, including a count of pending requests.
+ */
+export async function findMyRides(driverId: string) {
+  const result = await pool.query(FIND_MY_RIDES_SQL, [driverId]);
+  return result.rows.map((row) => ({
+    id: row.id,
+    source: row.source,
+    destination: row.destination,
+    ride_time:
+      row.departure_type === "scheduled" && row.ride_time
+        ? new Date(row.ride_time).toISOString() // Use ISO string for consistency
+        : "Flexible",
+    departure_type: row.departure_type,
+    status: row.status,
+    total_seats: row.total_seats,
+    available_seats: row.available_seats,
+    price_per_person: row.price_per_person,
+    created_at: row.created_at,
+    pending_requests_count: parseInt(row.pending_requests_count, 10),
+  }));
+}

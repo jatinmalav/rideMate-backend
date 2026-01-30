@@ -77,25 +77,27 @@ FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
 
 
-
--- RIDE REQUESTS
-CREATE TABLE IF NOT EXISTS ride_requests (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  ride_id UUID REFERENCES rides(id),
-  requester_id UUID REFERENCES users(id),
-  status VARCHAR(20) DEFAULT 'pending',
+CREATE TABLE ride_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  ride_id UUID NOT NULL REFERENCES rides(id) ON DELETE CASCADE,
+  passenger_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted')),
   created_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE (ride_id, requester_id)
+  
+  -- Constraint: One request per user per ride
+  UNIQUE(ride_id, passenger_id)
 );
 
--- CONVERSATIONS
-CREATE TABLE IF NOT EXISTS conversations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user1_id UUID REFERENCES users(id),
-  user2_id UUID REFERENCES users(id),
-  ride_id UUID REFERENCES rides(id),
+-- The Global Chat Table
+-- Ensures only one conversation thread exists between any two users
+CREATE TABLE conversations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user1_id UUID NOT NULL REFERENCES users(id),
+  user2_id UUID NOT NULL REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE (user1_id, user2_id, ride_id)
+  
+  -- Unique constraint to prevent duplicate conversation threads
+  UNIQUE(user1_id, user2_id)
 );
 
 -- MESSAGES

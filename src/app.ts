@@ -3,7 +3,9 @@ import cors from "cors";
 import { testDbConnection } from "./db";
 import authRoutes from "./auth/auth.routes";
 import ridesRoutes from "./rides/rides.routes";
+import requestRoutes from "./requests/requests.routes";
 import { authenticateJWT, AuthenticatedRequest } from "./middleware/auth.middleware";
+import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
 
@@ -16,6 +18,7 @@ app.use(express.json());
 // ---- Routes ----
 app.use("/auth", authRoutes);
 app.use("/rides", ridesRoutes);
+app.use("/requests", requestRoutes);
 
 
 // ----- Health checks -----
@@ -37,5 +40,7 @@ app.get("/me", authenticateJWT, (req: AuthenticatedRequest, res) => {
   res.json({ userId: req.userId });
 });
 
+// ---- Central Error Handler ----
+app.use(errorHandler);
 
 export default app;

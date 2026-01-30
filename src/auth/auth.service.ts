@@ -23,24 +23,25 @@ export async function registerUser(
   name?: string,
 ) {
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-  try{  
-        const result = await pool.query(
-        `INSERT INTO users (phone_number, password_hash, name, email)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, phone_number, name, email`,
-        [phone, hashedPassword, name || null, email || null],
-        );
-        const user = result.rows[0];
-        const token = signToken(user.id);
 
-        return { token, user };
-    }
-    catch(err: any){
-        if (err.code === "23505") {
-          throw new UserAlreadyExistsError();
-        }
-        throw err;
-    }   
+  const result = await pool
+    .query(
+      `INSERT INTO users (phone_number, password_hash, name, email)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, phone_number, name, email`,
+      [phone, hashedPassword, name || null, email || null],
+    )
+    .catch((err) => {
+      if (err.code === "23505") {
+        throw new UserAlreadyExistsError();
+      }
+      throw err; // Re-throw other errors
+    });
+
+  const user = result.rows[0];
+  const token = signToken(user.id);
+
+  return { token, user };
 }
 
 export async function loginUser(phone: string, password: string) {

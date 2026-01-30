@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import "express-async-errors"; // Must be imported before your app
 
 import app from "./app";
 
